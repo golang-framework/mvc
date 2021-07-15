@@ -1,0 +1,48 @@
+// Copyright 2022 YuWenYu  All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file.
+
+package autoload
+
+import (
+	"github.com/golang-framework/mvc/modules/property"
+	"github.com/spf13/pflag"
+)
+
+type autoload struct {
+	p *property.M
+}
+
+func init() {
+	ad := ad()
+
+	/**
+	 * Initialized Property
+	 *   -> assign the property.Property
+	 *   -> Adapters
+	**/
+	ad.property()
+	ad.adapters()
+}
+
+func ad() *autoload {
+	return &autoload {
+		p: property.New(),
+	}
+}
+
+func (ad *autoload) property() {
+	pflag.String("env", "", "environment configure")
+	pflag.Parse()
+
+	if e := ad.p.Property.BindPFlags(pflag.CommandLine); e != nil {
+		panic("")
+	}
+
+	property.Property = ad.p.Load()
+}
+
+func (ad *autoload) adapters() {
+
+}
+
