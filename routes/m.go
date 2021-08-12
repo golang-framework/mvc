@@ -5,7 +5,9 @@
 package routes
 
 import (
+	"github.com/golang-framework/mvc/modules/crypto"
 	"github.com/golang-framework/mvc/storage"
+	"github.com/spf13/cast"
 )
 
 const (
@@ -21,4 +23,23 @@ const (
 	Options = "OPTIONS"
 )
 
-var routeMap *storage.Y
+var routeMap = &storage.Y{}
+
+func Path(ctl, srv, act string) (interface{}, error) {
+	add := crypto.New()
+
+	add.Mode = storage.Common
+	add.D = []interface{}{storage.Md5, ctl + srv + act}
+
+	k, e := add.Engine()
+	if e != nil {
+		return nil, e
+	}
+
+	_, ok := (*routeMap)[cast.ToString(k)]
+	if ok == false {
+		return nil, nil
+	}
+
+	return (*routeMap)[cast.ToString(k)], nil
+}

@@ -5,8 +5,9 @@
 package storage
 
 const (
-	Fw string = "golang mvc framework"
+	Fw string = "golang-mvc framework"
 	FwVersion string = "v1.0.0"
+	FwTimeLocation string = "Asia/Shanghai"
 )
 
 type (
@@ -23,3 +24,11 @@ type (
 		Res *Y
 	}
 )
+
+func FwTpl(e error) *Tpl {
+	return &Tpl {
+		Status: StatusOK,
+		Msg: e.Error(),
+		Res: &Y{},
+	}
+}

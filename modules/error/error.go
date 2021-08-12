@@ -16,7 +16,9 @@ type M struct {
 }
 
 func (m *M) Initialized() {
-	storage.SetError(m.EMsg)
+	if m.EMsg != nil {
+		storage.SetError(m.EMsg)
+	}
 }
 
 func E(k string, content ... interface{}) error {

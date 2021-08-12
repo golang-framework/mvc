@@ -10,6 +10,12 @@ import (
 
 type File struct {}
 
+func NewFile() *File {
+	return &File {
+
+	}
+}
+
 func (f *File) IsExists(pathname string) (bool, error) {
 	var (
 		ok bool = false
@@ -29,6 +35,10 @@ func (f *File) IsExists(pathname string) (bool, error) {
 	}
 
 	return ok, err
+}
+
+func (f *File) OpenFile(name string, perm os.FileMode) (*os.File, error) {
+	return os.OpenFile(name, os.O_CREATE|os.O_WRONLY|os.O_APPEND, perm)
 }
 
 func (f *File) Open(pathname string) (*os.File, error) {

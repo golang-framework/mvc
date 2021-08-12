@@ -14,7 +14,7 @@ type autoload struct {
 }
 
 func init() {
-	ad := ad()
+	ad := newAutoload()
 
 	/**
 	 * Initialized Property
@@ -22,10 +22,9 @@ func init() {
 	 *   -> Adapters
 	**/
 	ad.property()
-	ad.adapters()
 }
 
-func ad() *autoload {
+func newAutoload() *autoload {
 	return &autoload {
 		p: property.New(),
 	}
@@ -36,13 +35,9 @@ func (ad *autoload) property() {
 	pflag.Parse()
 
 	if e := ad.p.Property.BindPFlags(pflag.CommandLine); e != nil {
-		panic("")
+		panic(e)
 	}
 
-	property.Property = ad.p.Load()
-}
-
-func (ad *autoload) adapters() {
-
+	property.Instance = ad.p.Load()
 }
 

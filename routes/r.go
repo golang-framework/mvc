@@ -7,14 +7,13 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/modules/crypto"
+	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/modules/exception"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
 )
 
-var (
-	Instance *Container = new(Container)
-)
+var Instance = new(Container)
 
 type (
 	R interface {
@@ -34,13 +33,13 @@ type (
 		Srv string
 		Ctl string
 		Act string
-		Mod string
 		Rel string
+		Mod string
 	}
 )
 
 func (container *Container) Engine(r *gin.Engine) {
-	var exp *exception.M = exception.New()
+	exp := exception.New()
 
 	// todo: no route then redirect
 	r.NoRoute(exp.NoRoute)
@@ -60,6 +59,8 @@ func (container *Container) Engine(r *gin.Engine) {
 
 			to.Put(r, (*container.Arr)[to.Tag()])
 		}
+	} else {
+		panic(err.E(storage.KeyM31007))
 	}
 }
 
@@ -70,12 +71,12 @@ func To(ctx *gin.RouterGroup, to map[*Key][]gin.HandlerFunc) {
 		add.Mode = storage.Common
 		add.D = []interface{}{storage.Md5, x.Ctl + x.Srv + x.Act}
 
-		key, err := add.Engine()
+		k, err := add.Engine()
 		if err != nil {
 			panic(err)
 		}
 
-		(*routeMap)[cast.ToString(key)] = x.Rel
+		(*routeMap)[cast.ToString(k)] = x.Rel
 
 		switch x.Mod {
 		case Any:
@@ -83,7 +84,7 @@ func To(ctx *gin.RouterGroup, to map[*Key][]gin.HandlerFunc) {
 			continue
 
 		case Get:
-			ctx.GET (x.Rel, ctrl ...)
+			ctx.GET(x.Rel, ctrl ...)
 			continue
 
 		case Put:
@@ -94,16 +95,16 @@ func To(ctx *gin.RouterGroup, to map[*Key][]gin.HandlerFunc) {
 			ctx.POST(x.Rel, ctrl ...)
 			continue
 
-		case Delete:
-			ctx.DELETE(x.Rel, ctrl ...)
-			continue
-
 		case Head:
 			ctx.HEAD(x.Rel, ctrl ...)
 			continue
 
 		case Patch:
 			ctx.PATCH(x.Rel, ctrl ...)
+			continue
+
+		case Delete:
+			ctx.DELETE(x.Rel, ctrl ...)
 			continue
 
 		case Options:

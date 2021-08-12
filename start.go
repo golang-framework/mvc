@@ -7,6 +7,8 @@ package mvc
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-framework/mvc/modules/caches/redis"
+	"github.com/golang-framework/mvc/modules/db"
 	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/modules/property"
 	"github.com/golang-framework/mvc/routes"
@@ -19,12 +21,37 @@ import (
 type Framework struct {
 	Route *routes.Container
 	Err *err.M
+
+	FwgLoggerWithFormat gin.HandlerFunc
 }
 
 func New() *Framework {
 	return &Framework {
+		Route: &routes.Container{
+			Src: nil,
+			Arr: nil,
+		},
+		Err: &err.M {
+			EMsg: nil,
+		},
 
+		FwgLoggerWithFormat: nil,
 	}
+}
+
+func (fw *Framework) Fw() {
+	fw.Err.Initialized()
+
+	(&db.M{}).Engine()
+	(&redis.M{}).Engine()
+}
+
+func (fw *Framework) FwRouter() {
+	if fw.Route == nil {
+		panic(err.E(storage.KeyM31006))
+	}
+
+	routes.Instance = fw.Route
 }
 
 func (fw *Framework) Run() {
@@ -40,7 +67,12 @@ func (fw *Framework) Run() {
 	r := gin.New()
 
 	r.Use(gin.Recovery())
-	r.Use(fw.loadLoggerWithFormat())
+
+	if fw.FwgLoggerWithFormat != nil {
+		r.Use(fw.FwgLoggerWithFormat)
+	} else {
+		r.Use(fw.mvcLoggerWithFormat())
+	}
 
 	routes.Instance.Engine(r)
 
@@ -52,15 +84,15 @@ func (fw *Framework) Run() {
 	**/
 	var e error = nil
 
-	port := ":" + cast.ToString(property.Property.Get("Common.Port", storage.PropertyPort))
-	hSsl := property.Property.Get("Common.Hssl.Power", storage.PropertyHsslPower)
+	port := ":" + cast.ToString(property.Instance.Get("Common.Port", storage.PropertyPort))
+	hSsl := property.Instance.Get("Common.Hssl.Power", storage.PropertyHsslPower)
 	if hSsl == 1 {
-		hSslcf := cast.ToString(property.Property.Get("PoT.Hssl.CertFile", ""))
+		hSslcf := cast.ToString(property.Instance.Get("PoT.Hssl.CertFile", ""))
 		if hSslcf == "" {
 			panic(err.E("KeyM31004"))
 		}
 
-		hSslkf := cast.ToString(property.Property.Get("PoT.Hssl.KeysFile", ""))
+		hSslkf := cast.ToString(property.Instance.Get("PoT.Hssl.KeysFile", ""))
 		if hSslkf == "" {
 			panic(err.E("KeyM31005"))
 		}
@@ -79,15 +111,15 @@ func (fw *Framework) Run() {
 	}
 }
 
-func (fw *Framework) loadLoggerWithFormat() gin.HandlerFunc {
+func (fw *Framework) mvcLoggerWithFormat() gin.HandlerFunc {
 	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		return fmt.Sprintf("[%v] %v |	%v |	%v |	%v |	%v |	%v(%v)\n",
+		return fmt.Sprintf("%v | %v | %v | %v | %v | %v | %v | %v\n",
 			storage.Fw,
-			param.TimeStamp.Format("2006/01/02 - 15:04:05"),
+			param.TimeStamp.Format(storage.FwFormatDateTime),
 			param.StatusCode,
-			param.Latency,
 			param.ClientIP,
 			param.Method,
+			param.Latency,
 			param.Path,
 			param.Request.Proto,
 		)

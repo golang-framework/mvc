@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var Property *M
+var Instance *M
 
 type M struct {
 	Property *viper.Viper
@@ -27,6 +27,7 @@ func New() *M {
 		Property: viper.New(),
 
 		tools: tool.New(),
+		files: tool.NewFile(),
 	}
 }
 
@@ -39,7 +40,7 @@ func (m *M) Load() *M {
 		panic(err.E(storage.KeyM31001))
 	}
 
-	if ok := m.tools.Contains(env, storage.PropertyEnv ...); ok == false {
+	if ok := m.tools.Contains(env, storage.PropertyEnv ...); ok == -1 {
 		panic(err.E(storage.KeyM31002))
 	}
 
@@ -79,7 +80,7 @@ func (m *M) Get(key string, val interface{}) interface{} {
 	return val
 }
 
-func (m *M) Usk(key string, val interface{}, opts ...viper.DecoderConfigOption) error {
+func (m *M) Usk(key string, val interface{}, opts ... viper.DecoderConfigOption) error {
 	return m.Property.UnmarshalKey(key, val, opts ...)
 }
 
