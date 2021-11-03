@@ -12,4 +12,8 @@ const (
 	Common string = "common"
 	Rsa string = "rsa"
 	Aes string = "aes"
+	Hmac string = "hmac"
+
+	Encrypt string = "encrypt"
+	Decrypt string = "decrypt"
 )

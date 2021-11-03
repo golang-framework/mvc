@@ -54,14 +54,34 @@ const (
 	KeyM33005 = "modules_caches_redis_r_01"
 	KeyM33006 = "modules_db_singleton_initialized_01"
 	KeyM33007 = "modules_db_Engine_01"
+	KeyM33008 = "modules_crypto_aes_engine_01"
+	KeyM33009 = "modules_crypto_hmac_engine_01"
+	KeyM33010 = "modules_crypto_hmac_engine_02"
+	KeyM33011 = "modules_crypto_hmac_engine_03"
+	KeyM33012 = "modules_jwt_jwt_generateCT_01"
+	KeyM33013 = "modules_jwt_jwt_analysisCT_01"
+	KeyM33014 = "modules_jwt_jwt_decodeToHP_01"
+	KeyM33015 = "modules_jwt_jwt_decodeToHP_02"
+	KeyM33016 = "modules_jwt_jwt_analysisCT_02"
+	KeyM33017 = "modules_jwt_jwt_chkSignature_01"
 
-	valM33001 = "Parameters Error"
-	valM33002 = "Error Crypto Common Engine Type"
-	valM33003 = "Error Crypto Engine Type "
+	valM33001 = "Parameters Error (crypto md5|sha1|sha256)"
+	valM33002 = "Error Crypto (md5|sha1|sha256) Common Engine Type"
+	valM33003 = "Error Crypto (md5|sha1|sha256) Engine Type "
 	valM33004 = "Empty Redis Parameters"
 	valM33005 = "Empty Redis Client"
 	valM33006 = "Empty db Engine"
 	valM33007 = "Empty db Engine"
+	valM33008 = "Parameters Error (crypto aes)"
+	valM33009 = "Parameters Error (crypto hmac)"
+	valM33010 = "Parameters Error (crypto hmac) Key or Val Empty"
+	valM33011 = "Error Crypto (hmac) Engine Type"
+	valM33012 = "Error JWT Type (jwt.headers.typ = Token | CipherText)"
+	valM33013 = "Error AnalysisCT (Md5, Sha1, Sha256), cipher text wrong"
+	valM33014 = "Error AnalysisCT Decode Headers"
+	valM33015 = "Error AnalysisCT Decode Payload"
+	valM33016 = "Error AnalysisCT Token"
+	valM33017 = "Empty AnalysisCT Signature"
 )
 
 var msg *E = &E {
@@ -89,6 +109,16 @@ var msg *E = &E {
 		KeyM33005: valM33005,
 		KeyM33006: valM33006,
 		KeyM33007: valM33007,
+		KeyM33008: valM33008,
+		KeyM33009: valM33009,
+		KeyM33010: valM33010,
+		KeyM33011: valM33011,
+		KeyM33012: valM33012,
+		KeyM33013: valM33013,
+		KeyM33014: valM33014,
+		KeyM33015: valM33015,
+		KeyM33016: valM33016,
+		KeyM33017: valM33017,
 	},
 }
 

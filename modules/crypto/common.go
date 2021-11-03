@@ -15,17 +15,15 @@ import (
 	"hash"
 )
 
-type Common struct {
+type common struct {
 
 }
 
-func newCommon() *Common {
-	return &Common {
-
-	}
+func newCommon() *common {
+	return &common {}
 }
 
-func (m *Common) Engine(d ... interface{}) (interface{}, error) {
+func (m *common) Engine(d ... interface{}) (interface{}, error) {
 	if len(d) <= 1 || cast.ToString(d[1]) == "" {
 		return nil, err.E(storage.KeyM33001)
 	}
@@ -35,22 +33,25 @@ func (m *Common) Engine(d ... interface{}) (interface{}, error) {
 	switch d[0] {
 	case storage.Md5:
 		res = md5.New()
-		return m.do(res, []byte(cast.ToString(d[1])))
+		break
 
 	case storage.Sha1:
 		res = sha1.New()
-		return m.do(res, []byte(cast.ToString(d[1])))
+		break
 
 	case storage.Sha256:
 		res = sha256.New()
-		return m.do(res, []byte(cast.ToString(d[1])))
+		break
 
 	default:
 		return nil, err.E(storage.KeyM33002)
+		break
 	}
+
+	return m.do(res, []byte(cast.ToString(d[1])))
 }
 
-func (m *Common) do(res hash.Hash, p []byte) (interface{}, error) {
+func (m *common) do(res hash.Hash, p []byte) (interface{}, error) {
 	res.Write(p)
 	return hex.EncodeToString(res.Sum([]byte(""))), nil
 }

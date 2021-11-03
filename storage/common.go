@@ -5,9 +5,10 @@
 package storage
 
 const (
-	Fw string = "golang-mvc framework"
-	FwVersion string = "v1.0.0"
-	FwTimeLocation string = "Asia/Shanghai"
+	Fw 					= "golang-mvc framework"
+	FwVersion		 	= "v1.0.0"
+	FwTimeLocation	 	= "Asia/Shanghai"
+	FwSeparate 			= "__::__"
 )
 
 type (

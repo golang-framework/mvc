@@ -4,6 +4,7 @@
 
 package storage
 
-const(
-	FwFormatDateTime string = "2006/01/02 - 15:04:05" // time of golang born
+const (
+	JHeadersTyp = "JWT Token"
+	JPayloadAud = "JWT Payload Aud Normal"
 )

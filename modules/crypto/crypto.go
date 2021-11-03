@@ -21,7 +21,9 @@ type (
 )
 
 var (
-	_ crypto = &Common{}
+	_ crypto = &common{}
+	_ crypto = &hmac{}
+	_ crypto = &Aes{}
 )
 
 func New() *M {
@@ -29,13 +31,26 @@ func New() *M {
 }
 
 func (m *M) Engine() (interface{}, error) {
+	var res crypto
+
 	switch m.Mode {
 	case storage.Common:
-		var res crypto = newCommon()
-		return res.Engine(m.D ...)
+		res = newCommon()
+		break
+
+	case storage.Hmac:
+		res = newHmac()
+		break
+
+	case storage.Aes:
+		res = newAes()
+		break
 
 	default:
 		return nil, err.E(storage.KeyM33003)
+		break
 	}
+
+	return res.Engine(m.D ...)
 }
 

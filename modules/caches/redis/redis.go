@@ -28,7 +28,7 @@ func (m *M) Engine() {
 }
 
 func R(d int) (*redis.Client, error) {
-	if tool.New().ContainSliceIndex(instance, d) == -1 {
+	if i := tool.New().ContainSliceIndex(instance, d); i == -1 {
 		return nil, err.E(storage.KeyM33005)
 	}
 

@@ -36,17 +36,17 @@ func newSingleton() *singleton {
 }
 
 func (m *singleton) initialized() {
-	if reflect.ValueOf(m.conns).IsNil() {
+	if ok := reflect.ValueOf(m.conns).IsNil(); ok {
 		return
 	}
 
-	if reflect.TypeOf(m.conns).Kind() != reflect.Slice {
+	if kind := reflect.TypeOf(m.conns).Kind(); kind != reflect.Slice {
 		panic(err.E(storage.KeyM33004))
 	}
 
 	instance = make([]*redis.Client, len(m.conns))
 	for i, cfg := range m.conns {
-		if reflect.TypeOf(cfg).Kind() == reflect.Ptr {
+		if kind := reflect.TypeOf(cfg).Kind(); kind == reflect.Ptr {
 			instance[i] = m.engine(cfg)
 		}
 	}
