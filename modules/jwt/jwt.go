@@ -20,8 +20,6 @@ type (
 		cry *crypto.M
 		tools *tool.M
 
-		//client *redis.Client
-
 		sign string
 		headers *Headers
 		payload *Payload

@@ -8,3 +8,7 @@ const (
 	JHeadersTyp = "JWT Token"
 	JPayloadAud = "JWT Payload Aud Normal"
 )
+
+var (
+	JTokenField = "TOKEN"
+)

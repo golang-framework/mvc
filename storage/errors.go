@@ -87,7 +87,7 @@ const (
 var msg *E = &E {
 	ErrPrefix: {
 		SuccessOK: "Success",
-		Incorrect: "Unknown",
+		Incorrect: "Unknown Error",
 
 		KeyM31001: valM31001,
 		KeyM31002: valM31002,
