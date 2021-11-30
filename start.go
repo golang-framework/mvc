@@ -27,9 +27,9 @@ type Framework struct {
 
 func New() *Framework {
 	return &Framework {
-		Route: &routes.Container{
-			Src: nil,
-			Arr: nil,
+		Route: &routes.Container {
+			M: &routes.M {},
+			E: &routes.Ahc {},
 		},
 		Err: &err.M {
 			EMsg: nil,
@@ -52,6 +52,7 @@ func (fw *Framework) FwRouter() {
 	}
 
 	routes.Instance = fw.Route
+	routes.Instance.Generate()
 }
 
 func (fw *Framework) Run() {

@@ -64,6 +64,17 @@ func (m *M) Load() *M {
 		panic(err)
 	}
 
+	// Todo: Add Router Configuration
+	dirRoutes := "./." + "router" + "." + storage.PropertySuffix
+
+	if ok, err := m.files.IsExists(dirRoutes); ok == false {
+		panic(err)
+	}
+
+	m.Property.SetConfigName(".router")
+	m.Property.AddConfigPath(".")
+	m.Property.MergeInConfig()
+
 	m.Property.WatchConfig()
 	m.Property.OnConfigChange(func (e fsnotify.Event){
 		// Todo: do something ...
