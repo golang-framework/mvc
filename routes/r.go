@@ -7,11 +7,13 @@ package routes
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/modules/crypto"
+	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/modules/exception"
 	"github.com/golang-framework/mvc/modules/property"
 	"github.com/golang-framework/mvc/modules/tool"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
+	"net/http"
 )
 
 var Instance = new(Container)
@@ -50,7 +52,7 @@ func (container *Container) Generate() {
 	container.arr = &arr{}
 	rArr := property.Instance.Get("route.Arr", map[string]interface{}{}).(map[string]interface{})
 	if len(rArr) == 0 {
-		panic("Unknown Error! - need add the explanation for error")
+		panic(err.E(storage.KeyM31009))
 	}
 
 	for namespace, val := range rArr {
@@ -118,12 +120,12 @@ func (container *Container) Engine(r *gin.Engine) {
 
 	rTag := property.Instance.Get("route.Tag", nil)
 	if rTag == nil {
-		panic("Unknown Error! - need add the explanation for error")
+		panic(err.E(storage.KeyM31007))
 	}
 
 	rRel := property.Instance.Get("route.Rel", nil)
 	if rRel == nil {
-		panic("Unknown Error! - need add the explanation for error")
+		panic(err.E(storage.KeyM31008))
 	}
 
 	for _, namespace := range rTag.(map[string]interface{}) {
@@ -162,7 +164,7 @@ func (container *Container) to(ctx *gin.RouterGroup, to map[*key]*Ahc) {
 		add := crypto.New()
 
 		add.Mode = storage.Common
-		add.D = []interface{}{storage.Md5, x.ctl + x.srv + x.act}
+		add.D = []interface{}{storage.Md5, x.srv + x.ctl + x.act}
 
 		k, err := add.Engine()
 		if err != nil {
@@ -172,35 +174,35 @@ func (container *Container) to(ctx *gin.RouterGroup, to map[*key]*Ahc) {
 		(*routeMap)[cast.ToString(k)] = x.rel
 
 		switch x.mod {
-		case Any:
+		case any:
 			ctx.Any(x.rel, *ctrl ...)
 			continue
 
-		case Get:
+		case http.MethodGet:
 			ctx.GET(x.rel, *ctrl ...)
 			continue
 
-		case Put:
+		case http.MethodPut:
 			ctx.PUT(x.rel, *ctrl ...)
 			continue
 
-		case Post:
+		case http.MethodPost:
 			ctx.POST(x.rel, *ctrl ...)
 			continue
 
-		case Head:
+		case http.MethodHead:
 			ctx.HEAD(x.rel, *ctrl ...)
 			continue
 
-		case Patch:
+		case http.MethodPatch:
 			ctx.PATCH(x.rel, *ctrl ...)
 			continue
 
-		case Delete:
+		case http.MethodDelete:
 			ctx.DELETE(x.rel, *ctrl ...)
 			continue
 
-		case Options:
+		case http.MethodOptions:
 			ctx.OPTIONS(x.rel, *ctrl ...)
 			continue
 

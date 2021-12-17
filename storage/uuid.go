@@ -4,6 +4,7 @@
 
 package storage
 
-const(
-	FwFormatDateTime = "2006/01/02 - 15:04:05" // time of golang born
+const (
+	HashIds 	= "hashids"
+	SnowFlake 	= "snowflake"
 )

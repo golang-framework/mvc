@@ -6,13 +6,13 @@ package storage
 
 const (
 	// Property File Suffix
-	EnvDEV string = "dev"
-	EnvSTG string = "stg"
-	EnvPRD string = "prd"
-	PropertySuffix string = "yaml"
+	EnvDEV = "dev"
+	EnvSTG = "stg"
+	EnvPRD = "prd"
+	PropertySuffix = "yaml"
 
-	PropertyPort string = "8577"
-	PropertyTimeLocation string = "Asia/Shanghai"
+	PropertyPort = "8577"
+	PropertyTimeLocation = "Asia/Shanghai"
 	PropertyHsslPower int = 0
 )
 

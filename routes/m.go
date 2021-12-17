@@ -10,26 +10,14 @@ import (
 	"github.com/spf13/cast"
 )
 
-const (
-	Any	= "ANY"
-	Get = "GET"
-	Put = "PUT"
-	Head = "HEAD"
-	Post = "POST"
-	Patch = "PATCH" // RFC 5789
-	Trace = "TRACE"
-	Delete = "DELETE"
-	Connect = "CONNECT"
-	Options = "OPTIONS"
-)
-
+const any = "ANY"
 var routeMap = &storage.Y{}
 
-func Path(ctl, srv, act string) (interface{}, error) {
+func Path(srv, ctl, act string) (interface{}, error) {
 	add := crypto.New()
 
 	add.Mode = storage.Common
-	add.D = []interface{}{storage.Md5, ctl + srv + act}
+	add.D = []interface{}{storage.Md5, srv + ctl + act}
 
 	k, e := add.Engine()
 	if e != nil {

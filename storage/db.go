@@ -5,14 +5,14 @@
 package storage
 
 const (
-	SelectOne = "ONE"
-	SelectAll = "ALL"
-	ByAsc = "ASC"
-	ByEsc = "DESC"
+	SelectOne 	= "ONE"
+	SelectAll 	= "ALL"
+	ByAsc 		= "ASC"
+	ByEsc 		= "DESC"
 
-	JoinLeft = "LEFT"
-	JoinInner = "INNER"
-	JoinRight = "RIGHT"
+	JoinLeft 	= "LEFT"
+	JoinInner 	= "INNER"
+	JoinRight 	= "RIGHT"
 )
 
 type (

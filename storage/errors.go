@@ -13,10 +13,10 @@ import (
  * modules:crypto -> M33001 ~ M33999
 **/
 const (
-	ErrPrefix string = "go_mvc_error_message_w"
+	ErrPrefix = "go_mvc_error_message_w"
 
-	SuccessOK string = "SuccessOK"
-	Incorrect string = "Incorrect"
+	SuccessOK = "SuccessOK"
+	Incorrect = "Incorrect"
 
 	// Modules -> M31001 ~ M31999 : property
 	KeyM31001 = "modules_property_property_load_01"
@@ -26,6 +26,8 @@ const (
 	KeyM31005 = "fw_start_run_02"
 	KeyM31006 = "fw_start_mvc_01"
 	KeyM31007 = "fw_route_r_engine_01"
+	KeyM31008 = "fw_route_r_engine_02"
+	KeyM31009 = "fw_route_r_generate_03"
 
 	valM31001 = "Environment Error"
 	valM31002 = "Environment Error Exclude"
@@ -33,7 +35,9 @@ const (
 	valM31004 = "Https Hssl.CertFile Empty"
 	valM31005 = "Https Hssl.KeysFile Empty"
 	valM31006 = "Empty Routes"
-	valM31007 = "Empty Routes"
+	valM31007 = "Empty Routes Tags"
+	valM31008 = "Empty Routes RelativePath"
+	valM31009 = "Empty Routes Array"
 
 	// Error Message for Component -> M32001 ~ M32999
 	KeyM32001 = "components_caches_redis_singleton_check_01"
@@ -96,6 +100,8 @@ var msg *E = &E {
 		KeyM31005: valM31005,
 		KeyM31006: valM31006,
 		KeyM31007: valM31007,
+		KeyM31008: valM31008,
+		KeyM31009: valM31009,
 
 		KeyM32001: valM32001,
 		KeyM32002: valM32002,

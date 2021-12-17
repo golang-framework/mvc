@@ -5,15 +5,15 @@
 package storage
 
 const (
-	Md5 string = "md5"
-	Sha1 string = "sha1"
-	Sha256 string = "sha256"
+	Md5  	= "md5"
+	Sha1  	= "sha1"
+	Sha256  = "sha256"
 
-	Common string = "common"
-	Rsa string = "rsa"
-	Aes string = "aes"
-	Hmac string = "hmac"
+	Rsa  	= "rsa"
+	Aes  	= "aes"
+	Hmac  	= "hmac"
+	Common  = "common"
 
-	Encrypt string = "encrypt"
-	Decrypt string = "decrypt"
+	Encrypt = "encrypt"
+	Decrypt = "decrypt"
 )
