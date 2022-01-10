@@ -23,7 +23,7 @@ var (
 	 *   - stg
 	 *   - prd
 	 */
-	PropertyEnv []interface{} = []interface{}{
+	PropertyEnv = []interface{}{
 		EnvDEV,
 		EnvSTG,
 		EnvPRD,

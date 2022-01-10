@@ -29,26 +29,30 @@ const (
 	KeyM31008 = "fw_route_r_engine_02"
 	KeyM31009 = "fw_route_r_generate_03"
 
-	valM31001 = "Environment Error"
-	valM31002 = "Environment Error Exclude"
-	valM31003 = "Failure to Create the Environment Yaml file"
-	valM31004 = "Https Hssl.CertFile Empty"
-	valM31005 = "Https Hssl.KeysFile Empty"
-	valM31006 = "Empty Routes"
-	valM31007 = "Empty Routes Tags"
-	valM31008 = "Empty Routes RelativePath"
-	valM31009 = "Empty Routes Array"
+	valM31001 = "[31001]Environment Error (--env=dev|stg|prd)"
+	valM31002 = "[31002]Environment Error (--env=dev|stg|prd)"
+	valM31003 = "[31003]Failure to Create the Environment Yaml file"
+	valM31004 = "[31004]Https Hssl.CertFile Empty"
+	valM31005 = "[31005]Https Hssl.KeysFile Empty"
+	valM31006 = "[31006]Empty Routes"
+	valM31007 = "[31007]Empty Routes Tags"
+	valM31008 = "[31008]Empty Routes RelativePath"
+	valM31009 = "[31009]Empty Routes Array"
 
 	// Error Message for Component -> M32001 ~ M32999
 	KeyM32001 = "components_caches_redis_singleton_check_01"
 	KeyM32002 = "components_db_singleton_select_01"
 	KeyM32003 = "components_db_singleton_select_02"
 	KeyM32004 = "components_db_singleton_select_03"
+	KeyM32005 = "components_jwt_jwt_check_01"
+	KeyM32006 = "components_jwt_jwt_check_02"
 
-	valM32001 = "Missing Redis Client"
-	valM32002 = "Missing DB Table"
-	valM32003 = "Error Order Type"
-	valM32004 = "Error Select Type"
+	valM32001 = "[32001]Missing Redis Client"
+	valM32002 = "[32002]Missing DB Table"
+	valM32003 = "[32003]Error Order Type"
+	valM32004 = "[32004]Error Select Type"
+	valM32005 = "[32005]JwT Signature Empty"
+	valM32006 = "[32006]JwT Iss or Aud or Sub Empty"
 
 	// Error Message for Modules -> M33001 ~ M33999
 	KeyM33001 = "modules_crypto_common_engine_01"
@@ -68,24 +72,26 @@ const (
 	KeyM33015 = "modules_jwt_jwt_decodeToHP_02"
 	KeyM33016 = "modules_jwt_jwt_analysisCT_02"
 	KeyM33017 = "modules_jwt_jwt_chkSignature_01"
+	KeyM33018 = "modules_jwt_jwt_verify_01"
 
-	valM33001 = "Parameters Error (crypto md5|sha1|sha256)"
-	valM33002 = "Error Crypto (md5|sha1|sha256) Common Engine Type"
-	valM33003 = "Error Crypto (md5|sha1|sha256) Engine Type "
-	valM33004 = "Empty Redis Parameters"
-	valM33005 = "Empty Redis Client"
-	valM33006 = "Empty db Engine"
-	valM33007 = "Empty db Engine"
-	valM33008 = "Parameters Error (crypto aes)"
-	valM33009 = "Parameters Error (crypto hmac)"
-	valM33010 = "Parameters Error (crypto hmac) Key or Val Empty"
-	valM33011 = "Error Crypto (hmac) Engine Type"
-	valM33012 = "Error JWT Type (jwt.headers.typ = Token | CipherText)"
-	valM33013 = "Error AnalysisCT (Md5, Sha1, Sha256), cipher text wrong"
-	valM33014 = "Error AnalysisCT Decode Headers"
-	valM33015 = "Error AnalysisCT Decode Payload"
-	valM33016 = "Error AnalysisCT Token"
-	valM33017 = "Empty AnalysisCT Signature"
+	valM33001 = "[33001]Parameters Error (crypto md5|sha1|sha256)"
+	valM33002 = "[33002]Error Crypto (md5|sha1|sha256) Common Engine Type"
+	valM33003 = "[33003]Error Crypto (md5|sha1|sha256) Engine Type "
+	valM33004 = "[33004]Empty Redis Parameters"
+	valM33005 = "[33005]Empty Redis Client"
+	valM33006 = "[33006]Empty db Engine"
+	valM33007 = "[33007]Empty db Engine"
+	valM33008 = "[33008]Parameters Error (crypto aes)"
+	valM33009 = "[33009]Parameters Error (crypto hmac)"
+	valM33010 = "[33010]Parameters Error (crypto hmac) Key or Val Empty"
+	valM33011 = "[33011]Error Crypto (hmac) Engine Type"
+	valM33012 = "[33012]Error JWT Type (jwt.headers.typ = Token | CipherText)"
+	valM33013 = "[33013]Error AnalysisCT (Md5, Sha1, Sha256), cipher text wrong"
+	valM33014 = "[33014]Error AnalysisCT Decode Headers"
+	valM33015 = "[33015]Error AnalysisCT Decode Payload"
+	valM33016 = "[33016]Error AnalysisCT Token"
+	valM33017 = "[33017]Empty AnalysisCT Signature"
+	valM33018 = "[33018]Error JWT Verify"
 )
 
 var msg *E = &E {
@@ -107,6 +113,8 @@ var msg *E = &E {
 		KeyM32002: valM32002,
 		KeyM32003: valM32003,
 		KeyM32004: valM32004,
+		KeyM32005: valM32005,
+		KeyM32006: valM32006,
 
 		KeyM33001: valM33001,
 		KeyM33002: valM33002,
@@ -125,6 +133,7 @@ var msg *E = &E {
 		KeyM33015: valM33015,
 		KeyM33016: valM33016,
 		KeyM33017: valM33017,
+		KeyM33018: valM33018,
 	},
 }
 
@@ -139,15 +148,15 @@ func SetError(add *E) {
 }
 
 func GetError(pfx, k string, content ... interface{}) string {
-	str := cast.ToString((*msg)[ErrPrefix][Incorrect])
+	m := cast.ToString((*msg)[ErrPrefix][Incorrect])
 
 	s, ok := (*msg)[pfx][k]
 	if ok {
-		str = cast.ToString(s)
+		m = cast.ToString(s)
 		if len(content) != 0 {
-			str = str + "," + fmt.Sprint(content ...)
+			m = m + "," + fmt.Sprint(content ...)
 		}
 	}
 
-	return str
+	return m
 }

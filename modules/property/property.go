@@ -40,7 +40,7 @@ func (m *M) Load() *M {
 		panic(err.E(storage.KeyM31001))
 	}
 
-	if ok := m.tools.Contains(env, storage.PropertyEnv ...); ok == -1 {
+	if env != storage.EnvDEV && env != storage.EnvSTG && env != storage.EnvPRD {
 		panic(err.E(storage.KeyM31002))
 	}
 
@@ -74,6 +74,15 @@ func (m *M) Load() *M {
 	m.Property.SetConfigName(".router")
 	m.Property.AddConfigPath(".")
 	m.Property.MergeInConfig()
+
+	// Todo: JwT Configuration
+	dirJwT := "./." + "jwt" + "." + storage.PropertySuffix
+
+	if ok, _ := m.files.IsExists(dirJwT); ok {
+		m.Property.SetConfigName(".jwt")
+		m.Property.AddConfigPath(".")
+		m.Property.MergeInConfig()
+	}
 
 	m.Property.WatchConfig()
 	m.Property.OnConfigChange(func (e fsnotify.Event){

@@ -34,8 +34,8 @@ func (ad *autoload) property() {
 	pflag.String("env", "", "environment configure")
 	pflag.Parse()
 
-	if e := ad.p.Property.BindPFlags(pflag.CommandLine); e != nil {
-		panic(e)
+	if errProperty := ad.p.Property.BindPFlags(pflag.CommandLine); errProperty != nil {
+		panic(errProperty)
 	}
 
 	property.Instance = ad.p.Load()

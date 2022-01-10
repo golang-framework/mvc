@@ -5,6 +5,7 @@
 package storage
 
 const (
-	HashIds 	= "hashids"
-	SnowFlake 	= "snowflake"
+	HashServiceIds 	= "hash_service_ids"
+	HashIds 		= "hash_ids"
+	SnowFlake 		= "snowflake"
 )

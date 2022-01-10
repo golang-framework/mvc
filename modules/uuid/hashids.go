@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	minLength int = 30
+	minLength int = 10
 )
 
 type HashIds struct {
@@ -39,9 +39,21 @@ func (m *HashIds) Generate(d ... interface{}) (interface{}, error) {
 		hd.MinLength = minLength
 	}
 
-	m.hid, _ = hashids.NewWithData(hd)
+	var err error
+	m.hid, err = hashids.NewWithData(hd)
+	if err != nil {
+		return nil, err
+	}
 
 	return m, nil
+}
+
+func (m *HashIds) EncodeInt64(nums []int64) (string, error) {
+	return m.hid.EncodeInt64(nums)
+}
+
+func (m *HashIds) DecodeInt64(h string) ([]int64, error) {
+	return m.hid.DecodeInt64WithError(h)
 }
 
 func (m *HashIds) EncodeHex(d string) (string, error) {

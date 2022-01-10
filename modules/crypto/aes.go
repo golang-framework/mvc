@@ -34,9 +34,9 @@ func (m *Aes) Engine(d ... interface{}) (interface{}, error) {
 	}
 
 	comm := newCommon()
-	h, e := comm.Engine(storage.Md5, d[0])
-	if e != nil {
-		return nil, e
+	h, errCryptoCommonEngine := comm.Engine(storage.Md5, d[0])
+	if errCryptoCommonEngine != nil {
+		return nil, errCryptoCommonEngine
 	}
 
 	m.key = []byte(cast.ToString(h)[8:24])

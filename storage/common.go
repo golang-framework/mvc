@@ -24,6 +24,16 @@ type (
 		Msg interface{}
 		Res *Y
 	}
+
+	TplCookie struct {
+		Name string
+		Value string
+		MaxAge int
+		Path string
+		Domain string
+		Secure bool
+		HttpOnly bool
+	}
 )
 
 func FwTpl(e error) *Tpl {

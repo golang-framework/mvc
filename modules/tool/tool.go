@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
 	"math/rand"
 	"reflect"
@@ -19,6 +20,31 @@ const (
 	c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 )
 
+var (
+	// Upper Case
+	uc = []interface{} {
+		"A","B","C","D","E","F","G","H","I","J","K","L","M",
+		"N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+	}
+
+	// Lower Case
+	lc = []interface{} {
+		"a","b","c","d","e","f","g","h","i","j","k","l","m",
+		"n","o","p","q","r","s","t","u","v","w","x","y","z",
+	}
+
+	// Arabic Numbers
+	an = []interface{} {
+		"0","1","2","3","4","5","6","7","8","9",
+	}
+
+	// Symbol Character
+	sc = []interface{} {
+		"~","!","@","#","$","%","^","&","*","(",")","_","-",
+		"+","=",":",";","'",",",".","<",">","?","/","|","\\",
+	}
+)
+
 type M struct {
 
 }
@@ -26,6 +52,55 @@ type M struct {
 func New() *M {
 	return &M {
 
+	}
+}
+
+func (m *M) SourceFilter(d ... *string) {
+	if len(d) < 1 {
+		return
+	}
+
+	for _, v := range d {
+		*v = strings.Trim(*v, " ")
+	}
+}
+
+func (m *M) MatchPattern(v, pattern string, s ... int) int8 {
+	if len(s) >= 1 && s[0] > 0 && len(v) < s[0] {
+		return -1
+	}
+
+	if len(s) >= 2 && s[1] > 0 && len(v) > s[1] {
+		return -1
+	}
+
+	switch pattern {
+	case storage.PatternType01:
+
+		if m.Contains(v,lc ...) == 1 && m.Contains(v,an ...) == 1 {
+			return 1
+		}
+		return -1
+
+	case storage.PatternType02:
+
+		if m.Contains(v,uc ...) == 1 && m.Contains(v,lc ...) == 1 &&
+		   m.Contains(v,an ...) == 1 && m.Contains(v,sc ...) == 1 {
+			return 1
+		}
+		return -1
+
+	case storage.PatternType03:
+
+		if m.Contains(v,lc ...) == 1 && m.Contains(v,an ...) == 1 &&
+		   m.Contains(v,sc ...) == 1 {
+			return 1
+		}
+		return -1
+
+	default:
+
+		return -1
 	}
 }
 

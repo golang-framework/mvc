@@ -26,19 +26,19 @@ type (
 	}
 
 	Headers struct {
-		Typ interface{} // 声明类型
-		Alg interface{} // 声明加密算法
+		Typ interface{} 	// 声明类型
+		Alg interface{} 	// 声明加密算法
 	}
 
 	Payload struct {
-		Iss interface{} // 签发者
-		Sub interface{} // 主题
-		Aud interface{} // 接受者
-		Iat interface{} // 生成签名时间
-		Nbf interface{} // 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
-		Jti interface{} // 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
-		Inf interface{} // 自定义内容
-		Exp time.Duration // 多少时间过期（时,分,秒）
+		Iss interface{} 	// 签发者
+		Sub interface{} 	// 主题
+		Aud interface{} 	// 接受者
+		Iat time.Time 		// 生成签名时间
+		Nbf time.Time		// 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
+		Jti interface{} 	// 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
+		Inf interface{} 	// 自定义内容
+		Exp time.Duration 	// 多少时间过期（时,分,秒）
 	}
 )
 
@@ -54,7 +54,7 @@ func New() *M {
 		payload: &Payload {
 			Iss: strings.Join([]string{storage.Fw, storage.FwVersion}, ","),
 			Aud: storage.JPayloadAud,
-			Iat: time.Now().UnixNano(),
+			Iat: time.Now(),
 			Exp: time.Minute,
 			Inf: nil,
 		},
@@ -62,19 +62,37 @@ func New() *M {
 }
 
 func (m *M) Produce() (interface{}, error) {
-	if e := m.chkSignature(); e != nil {
-		return nil, e
+	if errChkSignature := m.chkSignature(); errChkSignature != nil {
+		return nil, errChkSignature
 	}
 
-	return m.generateCT()
+	return m.generateCT(m.headers, m.payload)
 }
 
 func (m *M) Parse(c string) (*Headers, *Payload,  error) {
-	if e := m.chkSignature(); e != nil {
-		return nil, nil, e
+	if errChkSignature := m.chkSignature(); errChkSignature != nil {
+		return nil, nil, errChkSignature
 	}
 
 	return m.analysisCT(c)
+}
+
+func (m *M) Verify(c string) (int8, error) {
+	headers, payload, errParse := m.Parse(c)
+	if errParse != nil {
+		return -1, errParse
+	}
+
+	ciphers, errGenerateCT := m.generateCT(headers, payload)
+	if errGenerateCT != nil {
+		return -1, errGenerateCT
+	}
+
+	if c != ciphers {
+		return -1, err.E(storage.KeyM33018)
+	}
+
+	return 1, nil
 }
 
 func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
@@ -98,17 +116,17 @@ func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
 			strings.Join([]string {s[0], s[1]}, storage.FwSeparate),
 		}
 
-		en, e := m.cry.Engine()
-		if e != nil {
-			return nil, nil, e
+		hmacEncode, errJwTCode := m.cry.Engine()
+		if errJwTCode != nil {
+			return nil, nil, errJwTCode
 		}
 
-		if s[2] != base64.StdEncoding.EncodeToString([]byte(cast.ToString(en))) {
+		if s[2] != base64.StdEncoding.EncodeToString([]byte(cast.ToString(hmacEncode))) {
 			return nil, nil, err.E(storage.KeyM33016)
 		}
 
-		if e = m.decodeToHP(s[0], s[1], headers, payload); e != nil {
-			return nil, nil, e
+		if errJwTDecodeToHP := m.decodeToHP(s[0], s[1], headers, payload); errJwTDecodeToHP != nil {
+			return nil, nil, errJwTDecodeToHP
 		}
 
 		break
@@ -118,19 +136,19 @@ func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
 		m.cry.Mode = storage.Aes
 		m.cry.D = []interface{}{ m.sign }
 
-		en, e := m.cry.Engine()
-		if e != nil {
-			return nil, nil, e
+		aesEncode, errJwTEncode := m.cry.Engine()
+		if errJwTEncode != nil {
+			return nil, nil, errJwTEncode
 		}
 
-		de, e := en.(*crypto.Aes).Decrypt(c)
-		if e != nil {
-			return nil, nil, e
+		aesDecode, errJwTDecode := aesEncode.(*crypto.Aes).Decrypt(c)
+		if errJwTDecode != nil {
+			return nil, nil, errJwTDecode
 		}
 
-		s := strings.Split(cast.ToString(de), storage.FwSeparate)
-		if e = m.decodeToHP(s[0], s[1], headers, payload); e != nil {
-			return nil, nil, e
+		s := strings.Split(cast.ToString(aesDecode), storage.FwSeparate)
+		if errJwTDecodeToHP := m.decodeToHP(s[0], s[1], headers, payload); errJwTDecodeToHP != nil {
+			return nil, nil, errJwTDecodeToHP
 		}
 
 		break
@@ -147,14 +165,14 @@ func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
 	return headers, payload, nil
 }
 
-func (m *M) generateCT() (interface{}, error) {
-	strHeaders, _ := m.tools.ToJson(m.headers)
-	strPayload, _ := m.tools.ToJson(m.payload)
+func (m *M) generateCT(headers *Headers, payload *Payload) (interface{}, error) {
+	strHeaders, _ := m.tools.ToJson(headers)
+	strPayload, _ := m.tools.ToJson(payload)
 
-	headers := m.tools.Base64ToEncode([]byte(strHeaders))
-	payload := m.tools.Base64ToEncode([]byte(strPayload))
+	bteHeaders := m.tools.Base64ToEncode([]byte(strHeaders))
+	btePayload := m.tools.Base64ToEncode([]byte(strPayload))
 
-	ciphers := strings.Join([]string {headers, payload}, storage.FwSeparate)
+	ciphers := strings.Join([]string {bteHeaders, btePayload}, storage.FwSeparate)
 
 	var c interface{}
 
@@ -164,14 +182,14 @@ func (m *M) generateCT() (interface{}, error) {
 		m.cry.Mode = storage.Hmac
 		m.cry.D = []interface{}{m.headers.Alg, m.sign, ciphers}
 
-		en, e := m.cry.Engine()
-		if e != nil {
-			return nil, e
+		hmacEncode, errJwTCode := m.cry.Engine()
+		if errJwTCode != nil {
+			return nil, errJwTCode
 		}
 
 		c = strings.Join([]string {
-			headers, payload,
-			m.tools.Base64ToEncode([]byte(cast.ToString(en))),
+			bteHeaders, btePayload,
+			m.tools.Base64ToEncode([]byte(cast.ToString(hmacEncode))),
 		}, ".")
 
 		break
@@ -181,15 +199,17 @@ func (m *M) generateCT() (interface{}, error) {
 		m.cry.Mode = storage.Aes
 		m.cry.D = []interface{}{ m.sign }
 
-		en, e := m.cry.Engine()
-		if e != nil {
-			return nil, e
+		aesEngine, errJwTEngine := m.cry.Engine()
+		if errJwTEngine != nil {
+			return nil, errJwTEngine
 		}
 
-		c, e = en.(*crypto.Aes).Encrypt(ciphers)
-		if e != nil {
-			return nil, e
+		aesEncode, errJwTEncode := aesEngine.(*crypto.Aes).Encrypt(ciphers)
+		if errJwTEncode != nil {
+			return nil, errJwTEncode
 		}
+
+		c = aesEncode
 
 		break
 
@@ -208,15 +228,13 @@ func (m *M) generateCT() (interface{}, error) {
 }
 
 func (m *M) decodeToHP(cipherHeaders, cipherPayload string, headers *Headers, payload *Payload) error {
-	var e error
-
-	decodeToHeaders, e := m.tools.Base64ToDecode(cipherHeaders)
-	if e != nil {
+	decodeToHeaders, errDecodeToHeaders := m.tools.Base64ToDecode(cipherHeaders)
+	if errDecodeToHeaders != nil {
 		return err.E(storage.KeyM33014)
 	}
 
-	decodeToPayload, e := m.tools.Base64ToDecode(cipherPayload)
-	if e != nil {
+	decodeToPayload, errDecodeToPayload := m.tools.Base64ToDecode(cipherPayload)
+	if errDecodeToPayload != nil {
 		return err.E(storage.KeyM33015)
 	}
 
@@ -269,18 +287,18 @@ func (m *M) SetPayloadInf(inf interface{}) *M {
 	return m
 }
 
-func (m *M) SetPayloadIat(iat interface{}) *M {
+func (m *M) SetPayloadJti(jti interface{}) *M {
+	m.payload.Jti = jti
+	return m
+}
+
+func (m *M) SetPayloadIat(iat time.Time) *M {
 	m.payload.Iat = iat
 	return m
 }
 
-func (m *M) SetPayloadNbf(nbf interface{}) *M {
+func (m *M) SetPayloadNbf(nbf time.Time) *M {
 	m.payload.Nbf = nbf
-	return m
-}
-
-func (m *M) SetPayloadJti(jti interface{}) *M {
-	m.payload.Jti = jti
 	return m
 }
 

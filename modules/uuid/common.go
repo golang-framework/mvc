@@ -5,7 +5,11 @@
 package uuid
 
 import (
+	"github.com/golang-framework/mvc/modules/crypto"
 	"github.com/golang-framework/mvc/modules/tool"
+	"github.com/golang-framework/mvc/storage"
+	"github.com/spf13/cast"
+	"strings"
 	"time"
 )
 
@@ -20,10 +24,29 @@ func newCommon() *common {
 }
 
 func (m *common) Generate(d ... interface{}) (interface{}, error) {
+	var strServiceLabel string
+	if len(d) > 0 {
+		strServiceLabel = cast.ToString(d[0])
+	} else {
+		strServiceLabel = m.tools.RandomStr(10)
+	}
 
+	var strRandomNumber string
+	if len(d) == 2 {
+		strRandomNumber = m.tools.RandomStr(d[1].(int))
+	} else {
+		strRandomNumber = m.tools.RandomStr(10)
+	}
 
-	_ = m.tools.RandomStr(d[0].(int))
-	_ = time.Now().UnixNano()
+	strTimeUnixNano := cast.ToString(time.Now().UnixNano())
 
-	return nil, nil
+	var strCommonUUID string = strings.Join(
+		[]string { strServiceLabel,strRandomNumber,strTimeUnixNano }, storage.FwSeparate,
+	)
+
+	cry := crypto.New()
+	cry.Mode = storage.Common
+	cry.D = []interface{}{storage.Md5, strCommonUUID}
+
+	return cry.Engine()
 }

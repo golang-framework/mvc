@@ -80,9 +80,9 @@ func (m *singleton) engine(cfg *params) *redis.Client {
 		Limiter:            nil,
 	})
 
-	_, e := client.Ping(context.Background()).Result()
-	if e != nil {
-		panic(e)
+	_, errRedisSingletonEngine := client.Ping(context.Background()).Result()
+	if errRedisSingletonEngine != nil {
+		panic(errRedisSingletonEngine)
 	}
 
 	return client

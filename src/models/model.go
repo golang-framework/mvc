@@ -19,10 +19,14 @@ type Model struct {
 }
 
 func New(d int) *Model {
-	engine := &Model {}
+	engine := &Model{}
 	engine.conn, _ = db.Engine(d)
 
 	return engine
+}
+
+func (mod *Model) Conn() *xorm.Engine {
+	return mod.conn
 }
 
 func (mod *Model) Exec(sql ... interface{}) (sql.Result, error) {
@@ -33,11 +37,11 @@ func (mod *Model) Query(sql ... interface{}) ([]map[string][]byte, error) {
 	return mod.conn.Query(sql ...)
 }
 
-func (mod *Model) Insert(d interface{}) (int64, error) {
+func (mod *Model) Insert(d ... interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Insert()
+	return db.Insert(d ...)
 }
 
 func (mod *Model) Update(conditions *storage.Conditions, d interface{}, bean ... interface{}) (int64, error) {
@@ -47,18 +51,18 @@ func (mod *Model) Update(conditions *storage.Conditions, d interface{}, bean ...
 	return db.Where(conditions.Query, conditions.QueryArgs ...).Update(d, bean ...)
 }
 
-func (mod *Model) Delete(conditions *storage.Conditions, d interface{}) (int64, error) {
+func (mod *Model) Delete(conditions *storage.Conditions, d ... interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Where(conditions.Query, conditions.QueryArgs ...).Delete(d)
+	return db.Where(conditions.Query, conditions.QueryArgs ...).Delete(d ...)
 }
 
-func (mod *Model) Count(conditions *storage.Conditions, bean ... interface{}) (int64, error) {
+func (mod *Model) Count(conditions *storage.Conditions, d ... interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Where(conditions.Query, conditions.QueryArgs ...).Count(bean ...)
+	return db.Where(conditions.Query, conditions.QueryArgs ...).Count(d ...)
 }
 
 func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, error) {
