@@ -11,6 +11,7 @@ import (
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
 	"math/rand"
+	"net/url"
 	"reflect"
 	"strings"
 	"time"
@@ -62,6 +63,7 @@ func (m *M) SourceFilter(d ... *string) {
 
 	for _, v := range d {
 		*v = strings.Trim(*v, " ")
+		*v = url.QueryEscape(*v)
 	}
 }
 
