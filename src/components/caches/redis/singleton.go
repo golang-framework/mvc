@@ -50,7 +50,11 @@ func (c *Component) addPrefix(key string) string {
 }
 
 func (c *Component) SetPrefix(pfx string) *Component {
-	c.pfx = pfx
+	d := strings.Trim(pfx, " ")
+	if d != "" {
+		c.pfx = d
+	}
+
 	return c
 }
 
