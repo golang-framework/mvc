@@ -84,6 +84,15 @@ func (m *M) Load() *M {
 		m.Property.MergeInConfig()
 	}
 
+	// Todo: Self Define Configuration
+	dirSdc := "./." + "sdc" + "." + storage.PropertySuffix
+
+	if ok, _ := m.files.IsExists(dirSdc); ok {
+		m.Property.SetConfigName(".sdc")
+		m.Property.AddConfigPath(".")
+		m.Property.MergeInConfig()
+	}
+
 	m.Property.WatchConfig()
 	m.Property.OnConfigChange(func (e fsnotify.Event){
 		// Todo: do something ...

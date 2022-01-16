@@ -49,12 +49,14 @@ func (c *Component) addPrefix(key string) string {
 	return strings.Join([]string{c.pfx, key}, c.sep)
 }
 
-func (c *Component) SetPrefix(pfx string) {
+func (c *Component) SetPrefix(pfx string) *Component {
 	c.pfx = pfx
+	return c
 }
 
-func (c *Component) SetPrefixSeparate(sep string) {
+func (c *Component) SetPrefixSeparate(sep string) *Component {
 	c.sep = sep
+	return c
 }
 
 func (c *Component) Key(key string) string {
@@ -104,6 +106,38 @@ func (c *Component) IsExist(key interface{}) (interface{}, error) {
 	}
 
 	return c.client.Exists(c.ctx, c.addPrefix(cast.ToString(key))).Result()
+}
+
+func (c *Component) HSet(key string, values map[string]interface{}) (interface{}, error) {
+	if e := c.check(); e != nil {
+		return nil, e
+	}
+
+	return c.client.HSet(c.ctx, c.addPrefix(cast.ToString(key)), values).Result()
+}
+
+func (c *Component) HGet(key, field string) (interface{}, error) {
+	if e := c.check(); e != nil {
+		return nil, e
+	}
+
+	return c.client.HGet(c.ctx, c.addPrefix(cast.ToString(key)), field).Result()
+}
+
+func (c *Component) HDel(key string, fields ...string) (interface{}, error) {
+	if e := c.check(); e != nil {
+		return nil, e
+	}
+
+	return c.client.HDel(c.ctx, c.addPrefix(cast.ToString(key)), fields ...).Result()
+}
+
+func (c *Component) HExist(key, field string) (interface{}, error) {
+	if e := c.check(); e != nil {
+		return nil, e
+	}
+
+	return c.client.HExists(c.ctx, c.addPrefix(cast.ToString(key)), field).Result()
 }
 
 
