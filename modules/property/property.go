@@ -23,7 +23,7 @@ type M struct {
 }
 
 func New() *M {
-	return &M {
+	return &M{
 		Property: viper.New(),
 
 		tools: tool.New(),
@@ -60,8 +60,8 @@ func (m *M) Load() *M {
 	}
 
 	m.Property.SetConfigName("." + env)
-	if err := m.Property.ReadInConfig(); err != nil {
-		panic(err)
+	if errPropertyLoadReadInConfig := m.Property.ReadInConfig(); errPropertyLoadReadInConfig != nil {
+		panic(errPropertyLoadReadInConfig)
 	}
 
 	// Todo: Add Router Configuration
@@ -94,7 +94,7 @@ func (m *M) Load() *M {
 	}
 
 	m.Property.WatchConfig()
-	m.Property.OnConfigChange(func (e fsnotify.Event){
+	m.Property.OnConfigChange(func(e fsnotify.Event) {
 		// Todo: do something ...
 	})
 
@@ -109,8 +109,21 @@ func (m *M) Get(key string, val interface{}) interface{} {
 	return val
 }
 
-func (m *M) Usk(key string, val interface{}, opts ... viper.DecoderConfigOption) error {
-	return m.Property.UnmarshalKey(key, val, opts ...)
+func (m *M) Usk(key string, val interface{}, opts ...viper.DecoderConfigOption) error {
+	return m.Property.UnmarshalKey(key, val, opts...)
+}
+
+func (m *M) Nest(content string, fields ...string) interface{} {
+	if len(fields) == 0 {
+		return nil
+	}
+
+	var replacements = make([]interface{}, len(fields))
+	for i, field := range fields {
+		replacements[i] = m.Get(field, "")
+	}
+
+	return m.Get(fmt.Sprintf(content, replacements...), "")
 }
 
 func (m *M) tpl() string {
@@ -125,12 +138,10 @@ Common:
     CertFile: ""
     KeysFile: ""
 `,
-storage.Fw,
-storage.FwVersion,
-storage.Fw,
-storage.PropertyPort,
-storage.PropertyTimeLocation,
-storage.PropertyHsslPower,)
+		storage.Fw,
+		storage.FwVersion,
+		storage.Fw,
+		storage.PropertyPort,
+		storage.PropertyTimeLocation,
+		storage.PropertyHsslPower)
 }
-
-

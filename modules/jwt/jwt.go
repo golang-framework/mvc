@@ -6,52 +6,53 @@ package jwt
 
 import (
 	"encoding/base64"
+	"strings"
+	"time"
+
 	"github.com/golang-framework/mvc/modules/crypto"
 	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/modules/tool"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
-	"strings"
-	"time"
 )
 
 type (
 	M struct {
-		cry *crypto.M
+		cry   *crypto.M
 		tools *tool.M
 
-		sign string
+		sign    string
 		headers *Headers
 		payload *Payload
 	}
 
 	Headers struct {
-		Typ interface{} 	// 声明类型
-		Alg interface{} 	// 声明加密算法
+		Typ interface{} // 声明类型
+		Alg interface{} // 声明加密算法
 	}
 
 	Payload struct {
-		Iss interface{} 	// 签发者
-		Sub interface{} 	// 主题
-		Aud interface{} 	// 接受者
-		Iat time.Time 		// 生成签名时间
-		Nbf time.Time		// 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
-		Jti interface{} 	// 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
-		Inf interface{} 	// 自定义内容
-		Exp time.Duration 	// 多少时间过期（时,分,秒）
+		Iss interface{}   // 签发者
+		Sub interface{}   // 主题
+		Aud interface{}   // 接受者
+		Iat time.Time     // 生成签名时间
+		Nbf time.Time     // 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
+		Jti interface{}   // 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
+		Inf interface{}   // 自定义内容
+		Exp time.Duration // 多少时间过期（时,分,秒）
 	}
 )
 
 func New() *M {
-	return &M {
-		cry: crypto.New(),
+	return &M{
+		cry:   crypto.New(),
 		tools: tool.New(),
 
-		headers: &Headers {
+		headers: &Headers{
 			Typ: storage.JHeadersTyp,
 			Alg: storage.Sha256,
 		},
-		payload: &Payload {
+		payload: &Payload{
 			Iss: strings.Join([]string{storage.Fw, storage.FwVersion}, ","),
 			Aud: storage.JPayloadAud,
 			Iat: time.Now(),
@@ -69,7 +70,7 @@ func (m *M) Produce() (interface{}, error) {
 	return m.generateCT(m.headers, m.payload)
 }
 
-func (m *M) Parse(c string) (*Headers, *Payload,  error) {
+func (m *M) Parse(c string) (*Headers, *Payload, error) {
 	if errChkSignature := m.chkSignature(); errChkSignature != nil {
 		return nil, nil, errChkSignature
 	}
@@ -77,15 +78,38 @@ func (m *M) Parse(c string) (*Headers, *Payload,  error) {
 	return m.analysisCT(c)
 }
 
-func (m *M) Verify(c string) (int8, error) {
-	headers, payload, errParse := m.Parse(c)
-	if errParse != nil {
-		return -1, errParse
+func (m *M) Refresh(c string) (interface{}, error) {
+	_, errJwTVerify := m.verify(c)
+	if errJwTVerify != nil {
+		return nil, errJwTVerify
 	}
 
-	ciphers, errGenerateCT := m.generateCT(headers, payload)
-	if errGenerateCT != nil {
-		return -1, errGenerateCT
+	_, payload, errJwTParse := m.Parse(c)
+	if errJwTParse != nil {
+		return nil, errJwTParse
+	}
+
+	if payload.Iat.Add(payload.Exp).Before(time.Now()) {
+		return nil, err.E(storage.KeyM33019)
+	}
+
+	d, errJwTProduce := m.Produce()
+	if errJwTProduce != nil {
+		return nil, errJwTProduce
+	}
+
+	return d, nil
+}
+
+func (m *M) verify(c string) (int8, error) {
+	headers, payload, errJwTParse := m.Parse(c)
+	if errJwTParse != nil {
+		return -1, errJwTParse
+	}
+
+	ciphers, errJwTGenerateCT := m.generateCT(headers, payload)
+	if errJwTGenerateCT != nil {
+		return -1, errJwTGenerateCT
 	}
 
 	if c != ciphers {
@@ -95,7 +119,7 @@ func (m *M) Verify(c string) (int8, error) {
 	return 1, nil
 }
 
-func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
+func (m *M) analysisCT(c string) (*Headers, *Payload, error) {
 	var (
 		headers = &Headers{}
 		payload = &Payload{}
@@ -113,7 +137,7 @@ func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
 		m.cry.D = []interface{}{
 			m.headers.Alg,
 			m.sign,
-			strings.Join([]string {s[0], s[1]}, storage.FwSeparate),
+			strings.Join([]string{s[0], s[1]}, storage.FwSeparate),
 		}
 
 		hmacEncode, errJwTCode := m.cry.Engine()
@@ -134,7 +158,7 @@ func (m *M) analysisCT(c string) (*Headers, *Payload,  error) {
 	case storage.Aes:
 
 		m.cry.Mode = storage.Aes
-		m.cry.D = []interface{}{ m.sign }
+		m.cry.D = []interface{}{m.sign}
 
 		aesEncode, errJwTEncode := m.cry.Engine()
 		if errJwTEncode != nil {
@@ -172,7 +196,7 @@ func (m *M) generateCT(headers *Headers, payload *Payload) (interface{}, error) 
 	bteHeaders := m.tools.Base64ToEncode([]byte(strHeaders))
 	btePayload := m.tools.Base64ToEncode([]byte(strPayload))
 
-	ciphers := strings.Join([]string {bteHeaders, btePayload}, storage.FwSeparate)
+	ciphers := strings.Join([]string{bteHeaders, btePayload}, storage.FwSeparate)
 
 	var c interface{}
 
@@ -182,12 +206,12 @@ func (m *M) generateCT(headers *Headers, payload *Payload) (interface{}, error) 
 		m.cry.Mode = storage.Hmac
 		m.cry.D = []interface{}{m.headers.Alg, m.sign, ciphers}
 
-		hmacEncode, errJwTCode := m.cry.Engine()
-		if errJwTCode != nil {
-			return nil, errJwTCode
+		hmacEncode, errJwTHmacEngine := m.cry.Engine()
+		if errJwTHmacEngine != nil {
+			return nil, errJwTHmacEngine
 		}
 
-		c = strings.Join([]string {
+		c = strings.Join([]string{
 			bteHeaders, btePayload,
 			m.tools.Base64ToEncode([]byte(cast.ToString(hmacEncode))),
 		}, ".")
@@ -197,7 +221,7 @@ func (m *M) generateCT(headers *Headers, payload *Payload) (interface{}, error) 
 	case storage.Aes:
 
 		m.cry.Mode = storage.Aes
-		m.cry.D = []interface{}{ m.sign }
+		m.cry.D = []interface{}{m.sign}
 
 		aesEngine, errJwTEngine := m.cry.Engine()
 		if errJwTEngine != nil {
@@ -306,5 +330,3 @@ func (m *M) SetPayloadExp(exp time.Duration) *M {
 	m.payload.Exp = exp
 	return m
 }
-
-

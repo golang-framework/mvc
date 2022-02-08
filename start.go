@@ -6,6 +6,7 @@ package mvc
 
 import (
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/modules/caches/redis"
 	"github.com/golang-framework/mvc/modules/db"
@@ -20,18 +21,18 @@ import (
 
 type Framework struct {
 	Route *routes.Container
-	Err *err.M
+	Err   *err.M
 
 	FwgLoggerWithFormat gin.HandlerFunc
 }
 
 func New() *Framework {
-	return &Framework {
-		Route: &routes.Container {
-			M: &routes.M {},
-			E: &routes.Ahc {},
+	return &Framework{
+		Route: &routes.Container{
+			M: &routes.M{},
+			E: &routes.AHC{},
 		},
-		Err: &err.M {
+		Err: &err.M{
 			EMsg: nil,
 		},
 
@@ -52,7 +53,7 @@ func (fw *Framework) FwRouter() {
 	}
 
 	routes.Instance = fw.Route
-	routes.Instance.Generate()
+	routes.Instance.Load().Generate()
 }
 
 func (fw *Framework) Run() {
@@ -83,7 +84,7 @@ func (fw *Framework) Run() {
 	 *   -> PoT.Hssl.CertFile
 	 *   -> PoT.Hssl.KeysFile
 	**/
-	var e error = nil
+	var errStartRun error = nil
 
 	port := ":" + cast.ToString(property.Instance.Get("Common.Port", storage.PropertyPort))
 	hSsl := property.Instance.Get("Common.Hssl.Power", storage.PropertyHsslPower)
@@ -99,16 +100,16 @@ func (fw *Framework) Run() {
 		}
 
 		fmt.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTPs on %v\n", storage.Fw, port)
-		e = r.RunTLS(port, hSslcf, hSslkf)
+		errStartRun = r.RunTLS(port, hSslcf, hSslkf)
 
 	} else {
 		fmt.Fprintf(gin.DefaultWriter, "[%v] Listening and serving HTTP on %v\n", storage.Fw, port)
-		e = r.Run(port)
+		errStartRun = r.Run(port)
 
 	}
 
-	if e != nil {
-		panic(e)
+	if errStartRun != nil {
+		panic(errStartRun)
 	}
 }
 

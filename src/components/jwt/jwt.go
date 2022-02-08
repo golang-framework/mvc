@@ -9,13 +9,11 @@ import (
 	mJwT "github.com/golang-framework/mvc/modules/jwt"
 	"github.com/golang-framework/mvc/modules/property"
 	"github.com/golang-framework/mvc/storage"
-	"strings"
 	"time"
 )
 
 func NewJwT(name string) *Component {
-	key := strings.Join([]string{"JwT", name}, ".")
-	arr := property.Instance.Get(key, nil).(map[string]interface{})
+	arr := property.Instance.Nest("JWT.%v", name).(map[string]interface{})
 
 	componentJwT := New()
 
@@ -48,22 +46,22 @@ func NewJwT(name string) *Component {
 
 type Component struct {
 	Signature string
-	Typ interface{} 	// 声明类型
-	Alg interface{} 	// 声明加密算法
-	Iss interface{} 	// 签发者
-	Sub interface{} 	// 主题
-	Aud interface{} 	// 接受者
-	Iat time.Time 		// 生成签名时间
-	Nbf time.Time 		// 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
-	Jti interface{} 	// 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
-	Inf interface{} 	// 自定义内容
-	Exp time.Duration 	// 多少时间过期（时,分,秒）
+	Typ       interface{}   // 声明类型
+	Alg       interface{}   // 声明加密算法
+	Iss       interface{}   // 签发者
+	Sub       interface{}   // 主题
+	Aud       interface{}   // 接受者
+	Iat       time.Time     // 生成签名时间
+	Nbf       time.Time     // 生效时间(定义在什么时间之前, JWT不可用, 需要晚于签发时间)
+	Jti       interface{}   // 编号(唯一身份标识, 识别一次行token, 避免重复攻击)
+	Inf       interface{}   // 自定义内容
+	Exp       time.Duration // 多少时间过期（时,分,秒）
 
 	jwt *mJwT.M
 }
 
 func New() *Component {
-	return &Component {
+	return &Component{
 		Typ: storage.JHeadersTyp,
 		Iat: time.Now(),
 		Exp: time.Minute,
@@ -88,12 +86,12 @@ func (c *Component) Parse(d string) (*mJwT.Headers, *mJwT.Payload, error) {
 	return c.jwt.Parse(d)
 }
 
-func (c *Component) Verify(d string) (int8, error) {
+func (c *Component) Refresh(d string) (interface{}, error) {
 	if errJwTLoads := c.loads(); errJwTLoads != nil {
-		return -1, errJwTLoads
+		return nil, errJwTLoads
 	}
 
-	return c.jwt.Verify(d)
+	return c.jwt.Refresh(d)
 }
 
 func (c *Component) loads() error {
@@ -139,5 +137,3 @@ func (c *Component) chkJwT() error {
 
 	return nil
 }
-
-

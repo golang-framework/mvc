@@ -5,6 +5,12 @@
 package routes
 
 import (
+	"fmt"
+	"math/rand"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/modules/crypto"
 	err "github.com/golang-framework/mvc/modules/error"
@@ -13,13 +19,12 @@ import (
 	"github.com/golang-framework/mvc/modules/tool"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
-	"net/http"
 )
 
 var Instance = new(Container)
 
 type (
-	arr map[string]map[*key]*Ahc
+	arr map[string]map[*key]*AHC
 	key struct {
 		srv string
 		ctl string
@@ -28,18 +33,23 @@ type (
 		mod string
 	}
 
-	Ahc gin.HandlersChain
+	AHC gin.HandlersChain
 
 	M map[string]*H
+	I []interface{}
+
 	H struct {
-		Middleware *Ahc
-		Adapter []*Ahc
+		Middleware *AHC
+		Adapter    map[*I]*AHC
+		//Adapter    []*AHC
 	}
 
 	Container struct {
-		arr *arr
+		arr    *arr
+		toolTP *tool.M
+
 		M *M
-		E *Ahc
+		E *AHC
 	}
 
 	Exp struct {
@@ -48,50 +58,97 @@ type (
 	}
 )
 
-func (container *Container) Generate() {
-	container.arr = &arr{}
-	rArr := property.Instance.Get("route.Arr", map[string]interface{}{}).(map[string]interface{})
-	if len(rArr) == 0 {
-		panic(err.E(storage.KeyM31009))
+func Ai(d ...interface{}) *I {
+	if len(d) == 0 {
+		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
 	}
 
-	for namespace, val := range rArr {
-		if val == nil || len(val.([]interface{})) == 0 {
-			continue
+	if len(d) == 1 {
+		if d[0] == "{_}" {
+			return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
+		} else {
+			return &I{d[0], http.MethodGet}
 		}
+	}
 
-		for i, arr := range val.([]interface{}) {
-			if arr == nil {
+	if len(d) == 2 {
+		if d[0] == "{_}" {
+			return &I{1, d[1], time.Now().UnixNano(), rand.Intn(100000)}
+		} else {
+			return &I{d[0], d[1]}
+		}
+	} else {
+		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
+	}
+}
+
+func (container *Container) Load() *Container {
+	container.arr = &arr{}
+	container.toolTP = tool.New()
+
+	return container
+}
+
+func (container *Container) Generate() {
+	for namespace, s := range *container.M {
+		for i, ahc := range s.Adapter {
+			if len(*i) > 4 {
 				continue
 			}
 
-			if _, ok := arr.(map[interface{}]interface{})["ctl"].(string); ok == false {
-				continue
-			}
+			if len(*ahc) != 0 {
+				ctl, act, rel, mod := "", "", "", ""
 
-			if _, ok := arr.(map[interface{}]interface{})["act"].(string); ok == false {
-				continue
-			}
+				for _, v := range *ahc {
+					spf := strings.Split(container.toolTP.SourceFuncTP(v), ".")
+					if len(spf) < 3 {
+						break
+					}
 
-			if _, ok := arr.(map[interface{}]interface{})["rel"].(string); ok == false {
-				continue
-			}
+					if strings.Contains(container.toolTP.SourceFuncTP(v), "Controller") {
+						ctl = strings.ToLower(strings.Replace(
+							container.toolTP.SourceGrab(spf[1], 2, len(spf[1])-3),
+							"Controller", "", -1,
+						))
+						act = strings.ToLower(strings.Replace(spf[2], "-fm", "", -1))
 
-			if _, ok := arr.(map[interface{}]interface{})["mod"].(string); ok == false {
-				continue
-			}
+						if len(*i) == 2 {
+							rel = cast.ToString((*i)[0])
+							mod = cast.ToString((*i)[1])
 
-			if _, ok := (*container.arr)[namespace]; ok == false {
-				(*container.arr)[namespace] = make(map[*key]*Ahc)
-			}
+							break
+						}
 
-			(*container.arr)[namespace][&key {
-				srv: namespace,
-				ctl: arr.(map[interface{}]interface{})["ctl"].(string),
-				act: arr.(map[interface{}]interface{})["act"].(string),
-				rel: arr.(map[interface{}]interface{})["rel"].(string),
-				mod: arr.(map[interface{}]interface{})["mod"].(string),
-			}] = (*container.M)[namespace].Adapter[i]
+						rel = fmt.Sprintf("/%v/%v", ctl, act)
+
+						if len(*i) >= 3 {
+							if (*i)[0] == 0 {
+								mod = http.MethodGet
+							}
+
+							if (*i)[0] == 1 {
+								mod = cast.ToString((*i)[1])
+							}
+
+							break
+						}
+
+						break
+					}
+				}
+
+				if _, ok := (*container.arr)[namespace]; ok == false {
+					(*container.arr)[namespace] = make(map[*key]*AHC)
+				}
+
+				(*container.arr)[namespace][&key{
+					srv: namespace,
+					ctl: ctl,
+					act: act,
+					rel: rel,
+					mod: mod,
+				}] = ahc
+			}
 		}
 	}
 }
@@ -146,7 +203,7 @@ func (container *Container) Engine(r *gin.Engine) {
 			continue
 		}
 
-		hc := &Ahc{}
+		hc := &AHC{}
 		if (*container.M)[namespace.(string)].Middleware != nil {
 			hc = (*container.M)[namespace.(string)].Middleware
 		}
@@ -155,55 +212,55 @@ func (container *Container) Engine(r *gin.Engine) {
 	}
 }
 
-func (container *Container) groups(relativePath string, r *gin.Engine, to map[*key]*Ahc, hc *Ahc) {
-	container.to(r.Group(relativePath, *hc ...), to)
+func (container *Container) groups(relativePath string, r *gin.Engine, to map[*key]*AHC, hc *AHC) {
+	container.to(r.Group(relativePath, *hc...), to)
 }
 
-func (container *Container) to(ctx *gin.RouterGroup, to map[*key]*Ahc) {
+func (container *Container) to(ctx *gin.RouterGroup, to map[*key]*AHC) {
 	for x, ctrl := range to {
 		add := crypto.New()
 
 		add.Mode = storage.Common
 		add.D = []interface{}{storage.Md5, x.srv + x.ctl + x.act}
 
-		k, err := add.Engine()
-		if err != nil {
-			panic(err)
+		k, errRoutesCryptoEngine := add.Engine()
+		if errRoutesCryptoEngine != nil {
+			panic(errRoutesCryptoEngine)
 		}
 
 		(*routeMap)[cast.ToString(k)] = x.rel
 
 		switch x.mod {
 		case any:
-			ctx.Any(x.rel, *ctrl ...)
+			ctx.Any(x.rel, *ctrl...)
 			continue
 
 		case http.MethodGet:
-			ctx.GET(x.rel, *ctrl ...)
+			ctx.GET(x.rel, *ctrl...)
 			continue
 
 		case http.MethodPut:
-			ctx.PUT(x.rel, *ctrl ...)
+			ctx.PUT(x.rel, *ctrl...)
 			continue
 
 		case http.MethodPost:
-			ctx.POST(x.rel, *ctrl ...)
+			ctx.POST(x.rel, *ctrl...)
 			continue
 
 		case http.MethodHead:
-			ctx.HEAD(x.rel, *ctrl ...)
+			ctx.HEAD(x.rel, *ctrl...)
 			continue
 
 		case http.MethodPatch:
-			ctx.PATCH(x.rel, *ctrl ...)
+			ctx.PATCH(x.rel, *ctrl...)
 			continue
 
 		case http.MethodDelete:
-			ctx.DELETE(x.rel, *ctrl ...)
+			ctx.DELETE(x.rel, *ctrl...)
 			continue
 
 		case http.MethodOptions:
-			ctx.OPTIONS(x.rel, *ctrl ...)
+			ctx.OPTIONS(x.rel, *ctrl...)
 			continue
 
 		default:

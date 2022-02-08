@@ -19,9 +19,9 @@ func Path(srv, ctl, act string) (interface{}, error) {
 	add.Mode = storage.Common
 	add.D = []interface{}{storage.Md5, srv + ctl + act}
 
-	k, e := add.Engine()
-	if e != nil {
-		return nil, e
+	k, errRoutesCryptoEngine := add.Engine()
+	if errRoutesCryptoEngine != nil {
+		return nil, errRoutesCryptoEngine
 	}
 
 	_, ok := (*routeMap)[cast.ToString(k)]

@@ -68,16 +68,16 @@ func (c *Component) Key(key string) string {
 }
 
 func (c *Component) Keys(pattern interface{}) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.Keys(c.ctx, cast.ToString(pattern)).Result()
 }
 
 func (c *Component) Set(key, val interface{}, d ... time.Duration) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	var expire time.Duration = 0
@@ -89,56 +89,56 @@ func (c *Component) Set(key, val interface{}, d ... time.Duration) (interface{},
 }
 
 func (c *Component) Get(key interface{}) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.Get(c.ctx, c.addPrefix(cast.ToString(key))).Result()
 }
 
 func (c *Component) Del(key interface{}) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.Del(c.ctx, c.addPrefix(cast.ToString(key))).Result()
 }
 
 func (c *Component) IsExist(key interface{}) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.Exists(c.ctx, c.addPrefix(cast.ToString(key))).Result()
 }
 
 func (c *Component) HSet(key string, values map[string]interface{}) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.HSet(c.ctx, c.addPrefix(cast.ToString(key)), values).Result()
 }
 
 func (c *Component) HGet(key, field string) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.HGet(c.ctx, c.addPrefix(cast.ToString(key)), field).Result()
 }
 
 func (c *Component) HDel(key string, fields ...string) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.HDel(c.ctx, c.addPrefix(cast.ToString(key)), fields ...).Result()
 }
 
 func (c *Component) HExist(key, field string) (interface{}, error) {
-	if e := c.check(); e != nil {
-		return nil, e
+	if errComponentRedisChk := c.check(); errComponentRedisChk != nil {
+		return nil, errComponentRedisChk
 	}
 
 	return c.client.HExists(c.ctx, c.addPrefix(cast.ToString(key)), field).Result()

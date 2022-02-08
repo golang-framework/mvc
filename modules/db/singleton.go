@@ -71,9 +71,9 @@ func (m *singleton) engine(requirement *requirement, conns *conns) *xorm.Engine 
 		conns.Repo,
 	)
 
-	adapter, e := xorm.NewEngine(requirement.Driver, dataSourceName)
-	if e != nil {
-		panic(e)
+	adapter, errXormEngine := xorm.NewEngine(requirement.Driver, dataSourceName)
+	if errXormEngine != nil {
+		panic(errXormEngine)
 	}
 
 	adapter.SetMaxOpenConns(requirement.MaxOpen)

@@ -93,9 +93,9 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 
 	switch conditions.Types {
 	case storage.SelectOne:
-		_, e := db.Get(d)
-		if e != nil {
-			return -1, e
+		_, errXormEngine := db.Get(d)
+		if errXormEngine != nil {
+			return -1, errXormEngine
 		}
 
 		return 1, nil

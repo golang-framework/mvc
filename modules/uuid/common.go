@@ -39,8 +39,7 @@ func (m *common) Generate(d ... interface{}) (interface{}, error) {
 	}
 
 	strTimeUnixNano := cast.ToString(time.Now().UnixNano())
-
-	var strCommonUUID string = strings.Join(
+	strCommonUUID := strings.Join(
 		[]string { strServiceLabel,strRandomNumber,strTimeUnixNano }, storage.FwSeparate,
 	)
 
