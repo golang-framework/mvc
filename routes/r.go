@@ -41,7 +41,6 @@ type (
 	H struct {
 		Middleware *AHC
 		Adapter    map[*I]*AHC
-		//Adapter    []*AHC
 	}
 
 	Container struct {
@@ -106,11 +105,13 @@ func (container *Container) Generate() {
 					}
 
 					if strings.Contains(container.toolTP.SourceFuncTP(v), "Controller") {
-						ctl = strings.ToLower(strings.Replace(
+						ctl = container.toolTP.HumpToU(strings.Replace(
 							container.toolTP.SourceGrab(spf[1], 2, len(spf[1])-3),
 							"Controller", "", -1,
 						))
-						act = strings.ToLower(strings.Replace(spf[2], "-fm", "", -1))
+						act = container.toolTP.HumpToU(
+							strings.Replace(spf[2], "-fm", "", -1),
+						)
 
 						if len(*i) == 2 {
 							rel = cast.ToString((*i)[0])

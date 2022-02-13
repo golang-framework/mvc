@@ -147,6 +147,39 @@ func (_ *M) Base64ToDecode(d string) (string, error) {
 	return string(decode), errToolBase64ToDecode
 }
 
+func (_ *M) UToHump(d string) string {
+	d = strings.Replace(d, "_", " ", -1)
+	d = strings.Title(d)
+
+	return strings.Replace(d, " ", "", -1)
+}
+
+func (m *M) HumpToU(d string) string {
+	var (
+		ul = make([]string, 0)
+		hp = []rune(d)
+	)
+
+	if len(hp) == 0 {
+		return ""
+	}
+
+	for i := 0; i < len(hp); i++ {
+		if m.Contains(string(hp[i]), uc...) == 1 {
+			ul = append(ul, "_")
+			ul = append(ul, strings.ToLower(string(hp[i])))
+		} else {
+			ul = append(ul, string(hp[i]))
+		}
+	}
+
+	if len(hp) > 0 && ul[0] == "_" {
+		ul = append(ul[:0], ul[1:]...)
+	}
+
+	return strings.Join(ul, "")
+}
+
 func (_ *M) ToStruct(d, res interface{}) error {
 	return json.Unmarshal([]byte(cast.ToString(d)), res)
 }
