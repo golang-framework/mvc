@@ -6,11 +6,12 @@ package models
 
 import (
 	"database/sql"
+	"reflect"
+	"strings"
+
 	"github.com/golang-framework/mvc/modules/db"
 	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/storage"
-	"reflect"
-	"strings"
 	"xorm.io/xorm"
 )
 
@@ -29,40 +30,45 @@ func (mod *Model) Conn() *xorm.Engine {
 	return mod.conn
 }
 
-func (mod *Model) Exec(sql ... interface{}) (sql.Result, error) {
-	return mod.conn.Exec(sql ...)
+func (mod *Model) Exec(sql ...interface{}) (sql.Result, error) {
+	return mod.conn.Exec(sql...)
 }
 
-func (mod *Model) Query(sql ... interface{}) ([]map[string][]byte, error) {
-	return mod.conn.Query(sql ...)
+func (mod *Model) Query(sql ...interface{}) ([]map[string][]byte, error) {
+	return mod.conn.Query(sql...)
 }
 
-func (mod *Model) Insert(d ... interface{}) (int64, error) {
+func (mod *Model) Insert(d ...interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Insert(d ...)
+	return db.Insert(d...)
 }
 
-func (mod *Model) Update(conditions *storage.Conditions, d interface{}, bean ... interface{}) (int64, error) {
+func (mod *Model) Update(conditions *storage.Conditions, d interface{}, bean ...interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Where(conditions.Query, conditions.QueryArgs ...).Update(d, bean ...)
+	return db.Where(conditions.Query, conditions.QueryArgs...).Update(d, bean...)
 }
 
-func (mod *Model) Delete(conditions *storage.Conditions, d ... interface{}) (int64, error) {
+func (mod *Model) Delete(conditions *storage.Conditions, d ...interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Where(conditions.Query, conditions.QueryArgs ...).Delete(d ...)
+	return db.Where(conditions.Query, conditions.QueryArgs...).Delete(d...)
 }
 
-func (mod *Model) Count(conditions *storage.Conditions, d ... interface{}) (int64, error) {
+func (mod *Model) Count(conditions *storage.Conditions, d ...interface{}) (int64, error) {
 	db := mod.conn.NewSession()
 	defer func() { db.Close() }()
 
-	return db.Where(conditions.Query, conditions.QueryArgs ...).Count(d ...)
+	// add where conditions
+	if conditions.Query != nil && conditions.QueryArgs != nil {
+		db = db.Where(conditions.Query, conditions.QueryArgs...)
+	}
+
+	return db.Count(d...)
 }
 
 func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, error) {
@@ -76,7 +82,7 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 
 		db = db.Table(conditions.Table).Select(strings.Join(conditions.Field, ","))
 	} else {
-		db = db.Cols(conditions.Columns ...)
+		db = db.Cols(conditions.Columns...)
 	}
 
 	// join table
@@ -88,7 +94,7 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 
 	// add where conditions
 	if conditions.Query != nil && conditions.QueryArgs != nil {
-		db = db.Where(conditions.Query, conditions.QueryArgs ...)
+		db = db.Where(conditions.Query, conditions.QueryArgs...)
 	}
 
 	switch conditions.Types {
@@ -105,10 +111,10 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 		if len(conditions.OrderArgs) > 0 {
 			switch conditions.OrderType {
 			case storage.ByAsc:
-				db = db.Asc(conditions.OrderArgs ...)
+				db = db.Asc(conditions.OrderArgs...)
 
 			case storage.ByEsc:
-				db = db.Desc(conditions.OrderArgs ...)
+				db = db.Desc(conditions.OrderArgs...)
 
 			default:
 				return -1, err.E(storage.KeyM32003)
