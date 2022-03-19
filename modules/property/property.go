@@ -6,6 +6,7 @@ package property
 
 import (
 	"fmt"
+
 	"github.com/fsnotify/fsnotify"
 	err "github.com/golang-framework/mvc/modules/error"
 	"github.com/golang-framework/mvc/modules/tool"

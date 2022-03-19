@@ -6,10 +6,8 @@ package routes
 
 import (
 	"fmt"
-	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/modules/crypto"
@@ -56,30 +54,6 @@ type (
 		NoM gin.HandlerFunc
 	}
 )
-
-func Ai(d ...interface{}) *I {
-	if len(d) == 0 {
-		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
-	}
-
-	if len(d) == 1 {
-		if d[0] == "{_}" {
-			return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
-		} else {
-			return &I{d[0], http.MethodGet}
-		}
-	}
-
-	if len(d) == 2 {
-		if d[0] == "{_}" {
-			return &I{1, d[1], time.Now().UnixNano(), rand.Intn(100000)}
-		} else {
-			return &I{d[0], d[1]}
-		}
-	} else {
-		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
-	}
-}
 
 func (container *Container) Load() *Container {
 	container.arr = &arr{}

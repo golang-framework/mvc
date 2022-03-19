@@ -5,23 +5,21 @@
 package middleware
 
 import (
+	"reflect"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
-	"reflect"
 )
 
 type M struct {
-
 }
 
 func New() *M {
-	return &M {
-
-	}
+	return &M{}
 }
 
-func (_ *M) Abort(ctx *gin.Context, e error, d ... interface{}) {
+func (_ *M) Abort(ctx *gin.Context, e error, d ...interface{}) {
 	res := storage.FwTpl(e)
 
 	if len(d) >= 1 {
@@ -36,8 +34,6 @@ func (_ *M) Abort(ctx *gin.Context, e error, d ... interface{}) {
 		}
 	}
 
-	ctx.JSON(storage.StatusOK, res)
-	ctx.Abort()
-
+	ctx.AbortWithStatusJSON(storage.StatusOK, res)
 	return
 }

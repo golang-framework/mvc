@@ -5,13 +5,53 @@
 package routes
 
 import (
+	"math/rand"
+	"net/http"
+	"time"
+
 	"github.com/golang-framework/mvc/modules/crypto"
 	"github.com/golang-framework/mvc/storage"
 	"github.com/spf13/cast"
 )
 
-const any = "ANY"
+const (
+	any                 = "ANY"
+	DefaultRelativePath = "{_}"
+)
+
 var routeMap = &storage.Y{}
+
+func AiANY(relativePath, method interface{}) *I {
+	return ai(relativePath, any)
+}
+
+func AiGET(relativePath string) *I {
+	return ai(relativePath, http.MethodGet)
+}
+
+func AiPUT(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodPut)
+}
+
+func AiPOST(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodPost)
+}
+
+func AiHEAD(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodHead)
+}
+
+func AiPATCH(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodPatch)
+}
+
+func AiDELETE(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodDelete)
+}
+
+func AiOPTIONS(relativePath, method interface{}) *I {
+	return ai(relativePath, http.MethodOptions)
+}
 
 func Path(srv, ctl, act string) (interface{}, error) {
 	add := crypto.New()
@@ -30,4 +70,28 @@ func Path(srv, ctl, act string) (interface{}, error) {
 	}
 
 	return (*routeMap)[cast.ToString(k)], nil
+}
+
+func ai(d ...interface{}) *I {
+	if len(d) == 0 {
+		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
+	}
+
+	if len(d) == 1 {
+		if d[0] == DefaultRelativePath {
+			return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
+		} else {
+			return &I{d[0], http.MethodGet}
+		}
+	}
+
+	if len(d) == 2 {
+		if d[0] == DefaultRelativePath {
+			return &I{1, d[1], time.Now().UnixNano(), rand.Intn(100000)}
+		} else {
+			return &I{d[0], d[1]}
+		}
+	} else {
+		return &I{0, time.Now().UnixNano(), rand.Intn(100000)}
+	}
 }
