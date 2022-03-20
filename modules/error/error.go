@@ -7,9 +7,10 @@ package error
 import (
 	"errors"
 	"fmt"
+	"runtime"
+
 	"github.com/golang-framework/mvc/modules/tool"
 	"github.com/golang-framework/mvc/storage"
-	"runtime"
 )
 
 type M struct {
@@ -22,15 +23,15 @@ func (m *M) Initialized() {
 	}
 }
 
-func E(k string, content ... interface{}) error {
-	return Err(storage.ErrPrefix, k, content ...)
+func E(k string, content ...interface{}) error {
+	return Err(storage.ErrPrefix, k, content...)
 }
 
-func Err(pfx, k string, content ... interface{}) error {
-	return errors.New(storage.GetError(pfx, k, content ...))
+func Err(pfx, k string, content ...interface{}) error {
+	return errors.New(storage.GetError(pfx, k, content...))
 }
 
-func Num(pfx, k string, d ... int) string {
+func Num(pfx, k string, d ...int) string {
 	start, limit := 1, 5
 
 	if len(d) > 0 && d[0] > 0 {
@@ -49,5 +50,3 @@ func Position() interface{} {
 	_, file, line, _ := runtime.Caller(1)
 	return fmt.Sprintf("%v:%v", file, line)
 }
-
-

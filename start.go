@@ -11,6 +11,7 @@ import (
 	"github.com/golang-framework/mvc/modules/caches/redis"
 	"github.com/golang-framework/mvc/modules/db"
 	err "github.com/golang-framework/mvc/modules/error"
+	"github.com/golang-framework/mvc/modules/languages"
 	"github.com/golang-framework/mvc/modules/property"
 	"github.com/golang-framework/mvc/routes"
 	"github.com/golang-framework/mvc/storage"
@@ -20,8 +21,9 @@ import (
 )
 
 type Framework struct {
-	Route *routes.Container
-	Err   *err.M
+	Route       *routes.Container
+	Err         *err.M
+	Translation *languages.M
 
 	FwgLoggerWithFormat gin.HandlerFunc
 }
@@ -54,6 +56,10 @@ func (fw *Framework) FwRouter() {
 
 	routes.Instance = fw.Route
 	routes.Instance.Load().Generate()
+}
+
+func (fw *Framework) FwTranslation(d *storage.E) {
+	(&languages.M{TMsg: d}).Initialized()
 }
 
 func (fw *Framework) Run() {
