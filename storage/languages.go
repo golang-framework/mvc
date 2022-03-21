@@ -9,8 +9,12 @@ import (
 )
 
 var (
+	CurrentLanguage = ""
+
 	EN = language.English.String()
 	CN = language.Chinese.String()
 	CA = language.CanadianFrench.String()
 	FR = language.French.String()
+
+	Tm = &E{}
 )

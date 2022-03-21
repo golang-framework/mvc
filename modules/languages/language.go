@@ -11,7 +11,15 @@ import (
 	"golang.org/x/text/message"
 )
 
-func T(k, ln string, replace ...interface{}) string {
+func T(k string, replace ...interface{}) string {
+	if storage.CurrentLanguage == "" {
+		return ""
+	}
+
+	return TWithLanguage(k, storage.CurrentLanguage, replace...)
+}
+
+func TWithLanguage(k, ln string, replace ...interface{}) string {
 	return message.NewPrinter(language.MustParse(ln)).Sprintf(k, replace...)
 }
 
