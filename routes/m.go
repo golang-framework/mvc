@@ -29,27 +29,27 @@ func AiGET(relativePath string) *I {
 	return ai(relativePath, http.MethodGet)
 }
 
-func AiPUT(relativePath, method interface{}) *I {
+func AiPUT(relativePath string) *I {
 	return ai(relativePath, http.MethodPut)
 }
 
-func AiPOST(relativePath, method interface{}) *I {
+func AiPOST(relativePath string) *I {
 	return ai(relativePath, http.MethodPost)
 }
 
-func AiHEAD(relativePath, method interface{}) *I {
+func AiHEAD(relativePath string) *I {
 	return ai(relativePath, http.MethodHead)
 }
 
-func AiPATCH(relativePath, method interface{}) *I {
+func AiPATCH(relativePath string) *I {
 	return ai(relativePath, http.MethodPatch)
 }
 
-func AiDELETE(relativePath, method interface{}) *I {
+func AiDELETE(relativePath string) *I {
 	return ai(relativePath, http.MethodDelete)
 }
 
-func AiOPTIONS(relativePath, method interface{}) *I {
+func AiOPTIONS(relativePath string) *I {
 	return ai(relativePath, http.MethodOptions)
 }
 

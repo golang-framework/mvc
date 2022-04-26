@@ -70,17 +70,17 @@ func (fw *Framework) Run() {
 	gin.DisableConsoleColor()
 
 	// configs -> gin mode release
-	gin.SetMode(gin.ReleaseMode)
+	gin.SetMode(gin.DebugMode)
 
 	r := gin.New()
 
 	r.Use(gin.Recovery())
 
-	if fw.FwgLoggerWithFormat != nil {
-		r.Use(fw.FwgLoggerWithFormat)
-	} else {
-		r.Use(fw.mvcLoggerWithFormat())
-	}
+	//if fw.FwgLoggerWithFormat != nil {
+	//	r.Use(fw.FwgLoggerWithFormat)
+	//} else {
+	//	r.Use(fw.mvcLoggerWithFormat())
+	//}
 
 	routes.Instance.Engine(r)
 
