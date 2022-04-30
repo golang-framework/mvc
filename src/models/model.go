@@ -97,6 +97,20 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 		db = db.Where(conditions.Query, conditions.QueryArgs...)
 	}
 
+	// order by
+	if len(conditions.OrderArgs) > 0 {
+		switch conditions.OrderType {
+		case storage.ByAsc:
+			db = db.Asc(conditions.OrderArgs...)
+
+		case storage.ByEsc:
+			db = db.Desc(conditions.OrderArgs...)
+
+		default:
+			return -1, err.E(storage.KeyM32003)
+		}
+	}
+
 	switch conditions.Types {
 	case storage.SelectOne:
 		_, errXormEngine := db.Get(d)
@@ -107,19 +121,6 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 		return 1, nil
 
 	case storage.SelectAll:
-		// order by
-		if len(conditions.OrderArgs) > 0 {
-			switch conditions.OrderType {
-			case storage.ByAsc:
-				db = db.Asc(conditions.OrderArgs...)
-
-			case storage.ByEsc:
-				db = db.Desc(conditions.OrderArgs...)
-
-			default:
-				return -1, err.E(storage.KeyM32003)
-			}
-		}
 
 		// limit & start
 		if conditions.Limit > 0 && conditions.Start >= 0 {
@@ -132,14 +133,3 @@ func (mod *Model) Select(conditions *storage.Conditions, d interface{}) (int8, e
 		return -1, err.E(storage.KeyM32004)
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
